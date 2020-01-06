@@ -11,6 +11,23 @@ import java.security.NoSuchAlgorithmException;
  **/
 public class MD5Util {
 
+    public static void main(String[] args) {
+        for (int i = 0; i < 3; i++) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        System.out.println(Thread.currentThread().getName());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+        System.out.println("------------");
+    }
+
     public static String stringToMD5(String plainText) {
         byte[] secretBytes = null;
         try {

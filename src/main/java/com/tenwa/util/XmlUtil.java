@@ -207,4 +207,15 @@ public class XmlUtil {
     }
 
 
+
+//    // 查询行号行名
+//    String body = "<?xml version=\"1.0\" encoding = \"UTF-8\"?><Iss_Itreasury><QueryReq><OperationType>12</OperationType><SystemID>SAP</SystemID><SendTime>2020-01-06 10:39:11 560</SendTime><QueryContent><QueryBankCode></QueryBankCode><QueryPageNumber>10</QueryPageNumber><REVERSE1>18</REVERSE1><REVERSE2></REVERSE2></QueryContent></QueryReq></Iss_Itreasury>";
+//    // 查询支付指令
+//    String body =
+//// 生成支付指令
+//            String body =
+//
+//
+//
+//            HttpUtil.PostMsg("http://10.112.50.31:8080/FrontEnd/FrontEndServlet",body);
 }
