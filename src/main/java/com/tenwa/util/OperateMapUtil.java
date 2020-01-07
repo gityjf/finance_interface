@@ -4,10 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @program: finance_interface
@@ -18,7 +15,7 @@ public class OperateMapUtil {
 
     public static List<Map<String, String>> getDataBySql(String sql, Object... params) throws Exception {
         List<Map<String, String>> data = new ArrayList<Map<String, String>>();
-        Connection conn = JDBCUtil.getConn();
+        Connection conn = JDBCUtil.createConn();
         PreparedStatement pst = conn.prepareStatement(sql);
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
@@ -36,7 +33,7 @@ public class OperateMapUtil {
     }
 
     private static Map<String, String> getASResultSetToMap(ResultSet rs) throws Exception {
-        Map<String, String> paramMap = new HashMap<String, String>();
+        Map<String, String> paramMap = new LinkedHashMap<String, String>();
         ResultSetMetaData rd = rs.getMetaData();
         for (int i = 1; i <= rd.getColumnCount(); i++) {
             paramMap.put(rd.getColumnLabel(i), rs.getString(i));

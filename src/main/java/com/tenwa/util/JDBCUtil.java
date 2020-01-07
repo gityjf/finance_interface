@@ -24,6 +24,10 @@ public class JDBCUtil {
     }
 
 
+    public static Connection createConn() throws Exception {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
     public static Connection getConn() throws Exception {
         Connection conn = threadConn.get();
         if (conn == null) {
