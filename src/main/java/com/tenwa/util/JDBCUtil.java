@@ -12,9 +12,9 @@ import java.sql.SQLException;
  **/
 public class JDBCUtil {
 
-    private static final String URL = "jdbc:oracle:thin:@119.3.11.192:1521:orcl";
-    private static final String USER = "rzdp";
-    private static final String PASSWORD = "rzdp2019";
+    private static final String URL = "";
+    private static final String USER = "";
+    private static final String PASSWORD = "";
     private static final ThreadLocal<Connection> threadConn = new ThreadLocal();
 
     static {
