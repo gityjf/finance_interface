@@ -146,7 +146,7 @@ public class XmlUtil {
         //业务申请编号
         List<Map<String, String>> lists = new ArrayList<>();
         for (int i =1; i <= count; i++) {
-            String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", 1);
+            String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", i);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("ApplyCode", ApplyCode);
             map.put("CurrencyCode", "");
@@ -155,13 +155,15 @@ public class XmlUtil {
             map.put("Amount", "1.00");
             map.put("PayType", "1");
             map.put("IsPrivatePayID", "0");
-
             map.put("PayAccountNo", "81010007000000000531");
             map.put("RecAccountNo", "6893465989876589798875");
             map.put("RecAccountName", "物产中大财务公司1");
-            map.put("RecBankName", "中国人民银行营业管理部营业室");
-            map.put("RecBankProvince", "北京");
-            map.put("RecBankCity", "北京");
+
+            Map<String, String> bankMap = BankNoUtil.queryBankInfoByBankNo("001100011002");
+            map.put("RecBankName", bankMap.get("BankName"));
+            map.put("RecBankProvince", bankMap.get("AreaProvince"));
+            map.put("RecBankCity", bankMap.get("AreaName"));
+
             map.put("RecBankCNAPSNO", "12345678");
 
             map.put("RecBankUnionNO", "");
@@ -174,7 +176,7 @@ public class XmlUtil {
             map.put("SginText", "");
             map.put("MoneyUseCode", "");
             map.put("MoneyUseExplain", "");
-            map.put("REVERSE1", "test1");
+            map.put("REVERSE1", ""+i);
             map.put("REVERSE2", "");
             map.put("REVERSE3", "");
             map.put("REVERSE4", "");
@@ -189,8 +191,8 @@ public class XmlUtil {
     public static List<Map<String, String>> queryPayInstructList(){
         List<Map<String, String>> lists = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("APPLYCODE", "RZDP20200107154818108000001");
-        map.put("REVERSE1", "1900003");
+        map.put("APPLYCODE", "RZDP20200108132528273000001");
+        map.put("REVERSE1", "19000030");
         map.put("REVERSE2", MD5Util.stringToMD5("123456"));
         map.put("REVERSE3", "");
         map.put("REVERSE4", "");

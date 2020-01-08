@@ -11,13 +11,20 @@ public class Demo {
     private static final String FRONT_MACHINE_URL = "http://10.112.50.31:8080/FrontEnd/FrontEndServlet";
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        queryPayInstructionStatus("FBO2020010600000085","9999");
+    }
+
+    public static void main1(String[] args) throws Exception {
         String flowId = "FBO2020010600000085";
         String userId = "1234";
         //限制重复发起支付指令
         try {
             //查询所有待支付指令数据
-            List<Map<String, String>> maps = queryPayInstrctionList();
+//            List<Map<String, String>> maps = queryPayInstrctionList();
+
+
+            List<Map<String, String>> maps = XmlUtil.payInstructList(109);
             System.out.println(maps.size());
             int batchNum = 0;    //批量支付笔数,100笔发送一次
             boolean sendStatus = false;
@@ -56,7 +63,7 @@ public class Demo {
                                 }else{ // 接口调用失败
                                     String processCode = recLists.get(recLists.size() - 1).get("ProcessCode");
                                     String ProcessDesc = recLists.get(recLists.size() - 1).get("ProcessDesc");
-                                    batchUpdateFailRecord(sendMaps,processCode,ProcessDesc);
+                                    batchUpdateFailRecord(sendMaps,userId,processCode,ProcessDesc);
                                 }
                             }
                         }
@@ -178,17 +185,18 @@ public class Demo {
      * @param processCode
      * @param processDesc
      */
-    public static void batchUpdateFailRecord(List<Map<String, String>> payInstructMaps,String processCode,String processDesc){
+    public static void batchUpdateFailRecord(List<Map<String, String>> payInstructMaps,String userId,String processCode,String processDesc){
         PreparedStatement pst = null;
         try {
             Connection conn = JDBCUtil.getConn();
-            String batchUpdateSql = "update PAY_INSTRUCTION set PROCESSCODE = ? ,PROCESSDESC= ? where APPLYCODE = ?";
+            String batchUpdateSql = "update PAY_INSTRUCTION set PROCESSCODE = ? ,PROCESSDESC= ?,UPDATEUSERID = ? ,UPDATETIME = to_char(sysdate,'yyyy-MM-dd hh24:mi:ss') where APPLYCODE = ?";
             pst = conn.prepareStatement(batchUpdateSql);
             for (int i = 0; i < payInstructMaps.size(); i++) {
                 Map<String, String> map = payInstructMaps.get(i);
                 pst.setString(1,processCode);
                 pst.setString(2,processDesc);
-                pst.setString(3,map.get("ApplyCode"));
+                pst.setString(3,userId);
+                pst.setString(4,map.get("ApplyCode"));
                 pst.addBatch();
             }
             pst.executeBatch();
@@ -212,7 +220,7 @@ public class Demo {
         PreparedStatement pst = null;
         try {
             conn = JDBCUtil.createConn();
-            String updateSql = "update PAY_INSTRUCTION set PROCESSCODE = '0000',BUSINESSCODE = ?,BUSINESSDESC = ?,INSTRUCTIONSTATUSCOD =?,INSTRUCTIONSTATUSDESC = ?,UPDATEUSERID = ? ,UPDATETIME = to_char(sysdate,'yyyy-MM-dd hh24:mi:ss') where APPLYCODE = ?";
+            String updateSql = "update PAY_INSTRUCTION set PROCESSCODE = '0000',BUSINESSCODE = ?,BUSINESSDESC = ?,INSTRUCTIONSTATUSCODE =?,INSTRUCTIONSTATUSDESC = ?,UPDATEUSERID = ? ,UPDATETIME = to_char(sysdate,'yyyy-MM-dd hh24:mi:ss') where APPLYCODE = ?";
             pst = conn.prepareStatement(updateSql);
             pst.setString(1, payInstructMap.get("BusinessCode"));
             pst.setString(2, payInstructMap.get("BusinessDesc"));
@@ -248,17 +256,16 @@ public class Demo {
      */
     public static void queryPayInstructionStatus(String flowId, String userId) {
         try {
-            String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ? and  BUSINESSCODE = '0000' ;";
+//            String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ? and  BUSINESSCODE = '0000' ";
+            String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ?  ";
             List<Map<String, String>> applyCodeMaps = OperateMapUtil.getDataBySql(querySql, flowId);
             if(applyCodeMaps.size()>0){
                 applyCodeMaps.forEach(map->{
-                    map.forEach((key,value)->{
-                        map.put("REVERSE1", "190000");
-                        map.put("REVERSE2", MD5Util.stringToMD5("123456"));
-                        map.put("REVERSE3", "");
-                        map.put("REVERSE4", "");
-                        map.put("REVERSE5", "");
-                    });
+                    map.put("REVERSE1", "1900003");
+                    map.put("REVERSE2", MD5Util.stringToMD5("123456"));
+                    map.put("REVERSE3", "");
+                    map.put("REVERSE4", "");
+                    map.put("REVERSE5", "");
                 });
                 int batchNum = 0;
                 boolean sendStatus = false;
@@ -269,15 +276,19 @@ public class Demo {
                     batchNum++;
                     if (applyCodeMaps.size() < 100 && batchNum == applyCodeMaps.size()) {
                         sendStatus = true;
+                        System.out.println(applyCodeMaps.size()+"========="+batchNum);
                     } else if (batchNum == 100) {
                         sendStatus = true;
+                        System.out.println(applyCodeMaps.size()+"++++++++++"+batchNum);
                     } else if (applyCodeMaps.size() > 100 && i == applyCodeMaps.size() - 1) {
                         sendStatus = true;
+                        System.out.println(applyCodeMaps.size()+"----------"+batchNum);
                     }
                     if (sendStatus) {
                         //调用财企接口查询支付状态
                         String queryXml = XmlUtil.queryPayListToXml(sendMaps);
                         String receive = HttpUtil.post(FRONT_MACHINE_URL, queryXml);
+                        System.out.println("前置机返回:"+receive);
                         if(!"null".equals(receive)){
                             // 解析返回结果
                             List<Map<String, String>> recLists = XmlUtil.xmlToMap(receive);
@@ -289,7 +300,7 @@ public class Demo {
                             }else{ // 接口调用失败
                                 String processCode = recLists.get(recLists.size() - 1).get("ProcessCode");
                                 String ProcessDesc = recLists.get(recLists.size() - 1).get("ProcessDesc");
-                                batchUpdateFailRecord(sendMaps,processCode,ProcessDesc);
+                                batchUpdateFailRecord(sendMaps,userId,processCode,ProcessDesc);
                             }
                         }
                         batchNum = 0;

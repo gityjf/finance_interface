@@ -70,26 +70,19 @@ public class HttpUtil {
 
 
     public static void main(String[] args) throws Exception {
-
-//        List<Map<String, String>> lists = new ArrayList<>();
-//        Map<String, String> map = new LinkedHashMap<>();
-//        map.put("QueryBankCode", "001121013058");
-//        map.put("QueryPageNumber", "");
-//        map.put("REVERSE1", "测试");
-//        map.put("REVERSE2", "");
-//        lists.add(map);
-
-
         //发送时间
         String sendTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS").format(new Date());
-//        String param =  XmlUtil.payListToXml(XmlUtil.payInstructList(),sendTime);  // 生成支付指令
+//        String param =  XmlUtil.payListToXml(XmlUtil.payInstructList(1),sendTime);  // 生成支付指令
 //        String param =  XmlUtil.testGenerateXml();   //查询行名行号
-        String param =XmlUtil.queryPayListToXml(XmlUtil.queryPayInstructList());
+        String param =XmlUtil.queryPayListToXml(XmlUtil.queryPayInstructList()); //查询支付指令
         System.out.println("send xml: " + param);
         try {
             String receive = post("http://10.112.50.31:8080/FrontEnd/FrontEndServlet", param, Charset.defaultCharset(), null);
             System.out.println(receive);
             List<Map<String, String>> maps = XmlUtil.xmlToMap(receive);
+
+            System.out.println("错误信息"+maps.get(maps.size()-1).get("ProcessDesc"));
+
             for (Map<String, String> map1 : maps) {
                 System.out.println("========================");
                 map1.forEach((key, value) -> {
