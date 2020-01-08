@@ -21,7 +21,7 @@ import java.util.*;
 public class XmlUtil {
 
     private static Map<String, Integer> countMap = new HashMap<>();
-    private static final String prefix_xml = "<?xml version=\"1.0\" encoding = \"UTF-8\"?>";
+    public static final String prefix_xml = "<?xml version=\"1.0\" encoding = \"UTF-8\"?>";
 
 
     public static synchronized List<Map<String, String>> xmlToMap(Object param) throws Exception {
@@ -100,21 +100,7 @@ public class XmlUtil {
     }
 
 
-    /**
-     * 查询行名行号xml生成样例
-     *
-     * @param lists
-     * @return
-     */
-    public static String bankNoListToXml(List<Map<String, String>> lists) {
-        String sendTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS").format(new Date());
-        StringBuffer bf = new StringBuffer(prefix_xml);
-        bf.append("<Iss_Itreasury><QueryReq>").append("<OperationType>12</OperationType>")
-                .append("<SystemID>RZDP</SystemID>").append("<SendTime>" + sendTime + "</SendTime>")
-                .append(standardCreXml("QueryContent", lists))
-                .append("</QueryReq></Iss_Itreasury>");
-        return bf.toString();
-    }
+
 
     /**
      * 通用xml报文体生成
@@ -154,60 +140,49 @@ public class XmlUtil {
     }
 
 
-    //测试查询行名行号
-    public static String testGenerateXml() {
-        List<Map<String, String>> lists = new ArrayList<>();
-        Map<String, String> map = new LinkedHashMap<>();
-        map.put("QueryBankCode", "001100011002");
-        map.put("QueryPageNumber", "");
-        map.put("REVERSE1", "18");
-        map.put("REVERSE2", "test");
-        lists.add(map);
-        String reStr = bankNoListToXml(lists);
-        System.out.println(reStr);
-        return reStr;
-    }
 
 
     //测试支付指令
-    public static List<Map<String, String>> payInstructList() {
+    public static List<Map<String, String>> payInstructList(int count) {
         //业务申请编号
-        String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", 1);
+
         List<Map<String, String>> lists = new ArrayList<>();
-        Map<String, String> map = new LinkedHashMap<>();
-        map.put("ApplyCode", ApplyCode);
-        map.put("CurrencyCode", "");
-        map.put("ClientCode", "");
-        map.put("ExpectDate", "2020-01-07");
-        map.put("Amount", "1.00");
-        map.put("PayType", "1");
-        map.put("IsPrivatePayID", "0");
+        for (int i =1; i <= count; i++) {
+            String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", 1);
+            Map<String, String> map = new LinkedHashMap<>();
+            map.put("ApplyCode", ApplyCode);
+            map.put("CurrencyCode", "");
+            map.put("ClientCode", "");
+            map.put("ExpectDate", "2020-01-07");
+            map.put("Amount", "1.00");
+            map.put("PayType", "1");
+            map.put("IsPrivatePayID", "0");
 
-        map.put("PayAccountNo", "81010007000000000531");
-        map.put("RecAccountNo", "6893465989876589798875");
-        map.put("RecAccountName", "物产中大财务公司1");
-        map.put("RecBankName", "中国人民银行营业管理部营业室");
-        map.put("RecBankProvince", "北京");
-        map.put("RecBankCity", "北京");
-        map.put("RecBankCNAPSNO", "12345678");
+            map.put("PayAccountNo", "81010007000000000531");
+            map.put("RecAccountNo", "6893465989876589798875");
+            map.put("RecAccountName", "物产中大财务公司1");
+            map.put("RecBankName", "中国人民银行营业管理部营业室");
+            map.put("RecBankProvince", "北京");
+            map.put("RecBankCity", "北京");
+            map.put("RecBankCNAPSNO", "12345678");
 
-
-        map.put("RecBankUnionNO", "");
-        map.put("RecBankAgencyNO", "");
-        map.put("PayAbstract", "测试接口");
-        map.put("IsNonProductionID", "0");
-        map.put("PlanProjectCode", "");
-        map.put("CreateUserName", "1900003");
-        map.put("UserPassword", MD5Util.stringToMD5("123456"));
-        map.put("SginText", "");
-        map.put("MoneyUseCode", "");
-        map.put("MoneyUseExplain", "");
-        map.put("REVERSE1", "test1");
-        map.put("REVERSE2", "");
-        map.put("REVERSE3", "");
-        map.put("REVERSE4", "");
-        map.put("REVERSE5", "");
-        lists.add(map);
+            map.put("RecBankUnionNO", "");
+            map.put("RecBankAgencyNO", "");
+            map.put("PayAbstract", "测试接口");
+            map.put("IsNonProductionID", "0");
+            map.put("PlanProjectCode", "");
+            map.put("CreateUserName", "1900003");
+            map.put("UserPassword", MD5Util.stringToMD5("123456"));
+            map.put("SginText", "");
+            map.put("MoneyUseCode", "");
+            map.put("MoneyUseExplain", "");
+            map.put("REVERSE1", "test1");
+            map.put("REVERSE2", "");
+            map.put("REVERSE3", "");
+            map.put("REVERSE4", "");
+            map.put("REVERSE5", "");
+            lists.add(map);
+        }
         return lists;
     }
 

@@ -2,6 +2,8 @@ package com.tenwa.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * @program: finance_interface
@@ -24,68 +26,75 @@ public class JDBCUtil {
     }
 
 
-    public static Connection createConn() throws Exception {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+    public static Connection createConn() {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (Exception e) {
+            throw new RuntimeException("获取Connection出现异常！", e);
+        }
+        return conn;
     }
 
     public static Connection getConn() throws Exception {
         Connection conn = threadConn.get();
         if (conn == null) {
-            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            conn = createConn();
             conn.setAutoCommit(false);
             threadConn.set(conn);
         }
         return conn;
     }
 
-    public static void commit() throws Exception {
-        Connection conn = getConn();
+    public static void commit() {
+        Connection conn = threadConn.get();
         if (conn != null) {
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void rollback() {
+        Connection conn = threadConn.get();
+        if (conn != null) {
+            try {
+                conn.rollback();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void close() {
+        Connection conn = threadConn.get();
+        if (conn != null) {
+            threadConn.remove();
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public static void main(String[] args) {
+        try {
+            Connection conn = getConn();
+            PreparedStatement pst = conn.prepareStatement("select * from lc_first");
+            System.out.println(conn);
             conn.commit();
-            threadConn.remove();
+            Connection conn1 = threadConn.get();
+            System.out.println(conn1);
+            PreparedStatement pst1 = conn1.prepareStatement("select * from lc_first");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }
-
-    public static void rollback() throws Exception {
-        Connection conn = getConn();
-        if (conn != null) {
-            getConn().rollback();
-            threadConn.remove();
-        }
-    }
 
 
-    public static void main(String[] args) throws Exception {
-
-
-        for (int i = 0; i < 3; i++) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
-                        System.out.println(Thread.currentThread().getName());
-//                        Connection conn = getConn();
-//                        Connection conn1 = getConn();
-//                        System.out.println(conn+"==="+conn1);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }
-        System.out.println("------------");
-
-
-//        Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-//        String querySql = "select * from LC_FUND_INCOME_TEMP where id <> ?";
-//        List<Map<String, String>> maps = OperateMapUtil.getDataBySql(querySql, "5b63a2556a374c8b8615d044ebefbcfd");
-//        for (Map<String, String> map : maps) {
-//            System.out.println("========================");
-//            map.forEach((key, value) -> {
-//                System.out.println(key + "-----" + value);
-//            });
-//        }
     }
 
 }
