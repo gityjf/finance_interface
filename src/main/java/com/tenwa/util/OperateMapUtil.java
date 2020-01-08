@@ -29,6 +29,7 @@ public class OperateMapUtil {
         while (rs.next()) {
             data.add(getASResultSetToMap(rs));
         }
+        conn.close();
         return data;
     }
 

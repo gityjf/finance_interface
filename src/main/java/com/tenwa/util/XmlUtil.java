@@ -141,11 +141,9 @@ public class XmlUtil {
 
 
 
-
     //测试支付指令
     public static List<Map<String, String>> payInstructList(int count) {
         //业务申请编号
-
         List<Map<String, String>> lists = new ArrayList<>();
         for (int i =1; i <= count; i++) {
             String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", 1);
@@ -187,7 +185,7 @@ public class XmlUtil {
     }
 
 
-    //测试支付指令
+    //测试查询支付指令
     public static List<Map<String, String>> queryPayInstructList(){
         List<Map<String, String>> lists = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
@@ -200,8 +198,4 @@ public class XmlUtil {
         lists.add(map);
         return lists;
     }
-
-
-
-
 }
