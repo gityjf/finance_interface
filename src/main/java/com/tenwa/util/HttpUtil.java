@@ -74,7 +74,7 @@ public class HttpUtil {
         String sendTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS").format(new Date());
 //        String param =  XmlUtil.payListToXml(XmlUtil.payInstructList(1),sendTime);  // 生成支付指令
 //        String param =  XmlUtil.testGenerateXml();   //查询行名行号
-        String param =XmlUtil.queryPayListToXml(XmlUtil.queryPayInstructList()); //查询支付指令
+        String param =XmlUtil.queryPayListToXml(XmlUtil.testQueryPayInstructList()); //查询支付指令
         System.out.println("send xml: " + param);
         try {
             String receive = post("http://10.112.50.31:8080/FrontEnd/FrontEndServlet", param, Charset.defaultCharset(), null);

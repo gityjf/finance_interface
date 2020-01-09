@@ -23,16 +23,15 @@ public class Demo {
             //查询所有待支付指令数据
 //            List<Map<String, String>> maps = queryPayInstrctionList();
 
-
-            List<Map<String, String>> maps = XmlUtil.payInstructList(109);
+            List<Map<String, String>> maps = XmlUtil.testPayInstructList(109);
             System.out.println(maps.size());
             int batchNum = 0;    //批量支付笔数,100笔发送一次
             boolean sendStatus = false;
             //实际发送支付指令数据
             List<Map<String, String>> sendMaps = new ArrayList<Map<String, String>>();
             for (int i = 0; i < maps.size(); i++) {
-                String planId = maps.get(i).get("REVERSE5");
-                if (isNotLaunchPayInstruction(flowId, planId)) {
+                String ApplyCode = maps.get(i).get("ApplyCode");
+                if (isNotLaunchPayInstruction(flowId, ApplyCode)) {
                     sendMaps.add(maps.get(i));
                     batchNum++;
                     if (maps.size() < 100 && batchNum == maps.size()) {
@@ -49,7 +48,7 @@ public class Demo {
                         boolean isSucc = savePayRecord(sendMaps, flowId, userId, sendTime);
                         if (isSucc) {
                             // 生成支付指令xml
-                            String payXml = XmlUtil.payListToXml(sendMaps, sendTime);
+                            String payXml = XmlUtil.createPayListToXml(sendMaps, sendTime);
                             // 调用前置机,发送支付指令
                             String receive = HttpUtil.post(FRONT_MACHINE_URL, payXml);
                             if(!"null".equals(receive)){
@@ -82,25 +81,25 @@ public class Demo {
      * 判断支付指令不存在
      *
      * @param flowId
-     * @param planId
+     * @param applyCode
      * @return
      * @throws Exception
      */
-    public static boolean isNotLaunchPayInstruction(String flowId, String planId) throws Exception {
-        List<Map<String, String>> dataBySql = OperateMapUtil.getDataBySql("select count(1) as num from PAY_INSTRUCTION where FLOWUNID = ? and PLAN_ID = ? and BUSINESSCODE = '0000' ", flowId, planId);
+    public static boolean isNotLaunchPayInstruction(String flowId, String applyCode) throws Exception {
+        List<Map<String, String>> dataBySql = OperateMapUtil.getDataBySql("select count(*) as NUM from PAY_INSTRUCTION where FLOWUNID = ? and APPLYCODE = ? and (BUSINESSCODE is null or BUSINESSCODE = '9999')", flowId, applyCode);
         return Integer.valueOf(dataBySql.get(0).get("NUM")) == 0;
     }
 
     /**
      * 保存支付指令记录
      *
-     * @param recMaps
+     * @param sendMaps
      * @param flowId
      * @param userId
      * @param sendTime
      * @return
      */
-    private static boolean savePayRecord(List<Map<String, String>> recMaps, String flowId, String userId, String sendTime) {
+    private static boolean savePayRecord(List<Map<String, String>> sendMaps, String flowId, String userId, String sendTime) {
         boolean isSucc = false;
         PreparedStatement pst = null;
         try {
@@ -108,18 +107,17 @@ public class Demo {
             String insertSql = "insert into PAY_INSTRUCTION (ID,PLAN_ID,FLOWUNID,OPERATIONTYPE,SYSTEMID,BATCHNO,ISMANUAL,SENDTIME,APPLYCODE,CURRENCYCODE,CLIENTCODE,EXPECTDATE,AMOUNT,PAYTYPE,ISPRIVATEPAYID,PAYACCOUNTNO,RECACCOUNTNO,RECACCOUNTNAME,RECBANKNAME,RECBANKPROVINCE,RECBANKCITY,RECBANKCNAPSNO,RECBANKUNIONNO,RECBANKAGENCYNO,PAYABSTRACT,ISNONPRODUCTIONID,PLANPROJECTCODE,CREATEUSERNAME,USERPASSWORD,SGINTEXT,MONEYUSECODE,MONEYUSEEXPLAIN,REVERSE1,REVERSE2,REVERSE3,REVERSE4,REVERSE5,INPUTUSERID,INPUTTIME) " +
                     " values (sys_guid(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,to_char(sysdate,'yyyy-MM-dd hh24:mi:ss'))";
             pst = conn.prepareStatement(insertSql);
-            for (int i = 0; i < recMaps.size(); i++) {
-                Map<String, String> map = recMaps.get(i);
-                Iterator<Map.Entry<String, String>> it = map.entrySet().iterator();
+            for (int i = 0; i < sendMaps.size(); i++) {
+                Map<String, String> map = sendMaps.get(i);
                 int paramindex = 0;
-                // 备用字段5记录 plan_id
-                pst.setString(++paramindex, recMaps.get(0).get("REVERSE5"));
+                pst.setString(++paramindex, map.get("ApplyCode").substring(3));
                 pst.setString(++paramindex, flowId);
                 pst.setString(++paramindex, "1");
-                pst.setString(++paramindex, "RZDP");
+                pst.setString(++paramindex, "RZD");
                 pst.setString(++paramindex, "");
                 pst.setString(++paramindex, "1");
                 pst.setString(++paramindex, sendTime);
+                Iterator<Map.Entry<String, String>> it = map.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<String, String> next = it.next();
                     pst.setString(++paramindex, ("nofill".equals(next.getValue()) ? "" : next.getValue()));
@@ -159,11 +157,11 @@ public class Demo {
     public static List<Map<String, String>> queryPayInstrctionList() {
         List<Map<String, String>> maps = null;
         try {
-            String querySql = "select 'RZDP'||to_char(systimestamp,'yyyymmddHHmissff')||trim(TO_CHAR(ROWNUM,'000000')) as \"ApplyCode\", 'nofill' as \"CurrencyCode\",'nofill' as \"ClientCode\",to_char(to_date(FACT_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as \"ExpectDate\" ,\n" +
+            String querySql = "select 'RDP'||PLAN_ID as \"ApplyCode\", 'nofill' as \"CurrencyCode\",'nofill' as \"ClientCode\",to_char(to_date(FACT_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') as \"ExpectDate\" ,\n" +
                     "       FACT_MONEY as \"Amount\",'1' as \"PayType\",'0' as \"IsPrivatePayID\",ACC_batchNum as \"PayAccountNo\",CLIENT_ACCbatchNum as \"RecAccountNo\", CLIENT_ACCOUNT as \"RecAccountName\",\n" +
                     "        CLIENT_BANK as \"RecBankName\",'省' as \"RecBankProvince\",'市' as \"RecBankCity\", 'NAPSNO' as \"RecBankCNAPSNO\", unionbatchNum as \"RecBankUnionNO\",'nofill' as \"RecBankAgencyNO\",\n" +
                     "       NVL(MEMO,'') as \"PayAbstract\" , '0' as \"IsNonProductionID\" ,'nofill' as \"PlanProjectCode\" ,'001' as \"CreateUserName\" ,'123456a' as \"UserPassword\" ,'nofill' as \"SginText\",\n" +
-                    "       'nofill' as \"MoneyUseCode\" ,'nofill' as \"MoneyUseExplain\", 'nofill' as REVERSE1,'nofill' as REVERSE2 ,'nofill' as REVERSE3 , 'nofill' as REVERSE4 ,PLAN_ID as REVERSE5\n" +
+                    "       'nofill' as \"MoneyUseCode\" ,'nofill' as \"MoneyUseExplain\", 'nofill' as REVERSE1,'nofill' as REVERSE2 ,'nofill' as REVERSE3 , 'nofill' as REVERSE4 ,'nofill' as REVERSE5\n" +
                     "        from LC_FUND_INCOME_TEMP where unionbatchNum is not null and rownum < 5";
             maps = OperateMapUtil.getDataBySql(querySql);
 //            for (Map<String, String> map1 : maps) {
@@ -256,7 +254,7 @@ public class Demo {
      */
     public static void queryPayInstructionStatus(String flowId, String userId) {
         try {
-//            String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ? and  BUSINESSCODE = '0000' ";
+//            String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ? and nvl(INSTRUCTIONSTATUSCODE,0) <> 1 ";
             String querySql = "select APPLYCODE as \"ApplyCode\" from PAY_INSTRUCTION where FLOWUNID = ?  ";
             List<Map<String, String>> applyCodeMaps = OperateMapUtil.getDataBySql(querySql, flowId);
             if(applyCodeMaps.size()>0){
@@ -276,13 +274,10 @@ public class Demo {
                     batchNum++;
                     if (applyCodeMaps.size() < 100 && batchNum == applyCodeMaps.size()) {
                         sendStatus = true;
-                        System.out.println(applyCodeMaps.size()+"========="+batchNum);
                     } else if (batchNum == 100) {
                         sendStatus = true;
-                        System.out.println(applyCodeMaps.size()+"++++++++++"+batchNum);
                     } else if (applyCodeMaps.size() > 100 && i == applyCodeMaps.size() - 1) {
                         sendStatus = true;
-                        System.out.println(applyCodeMaps.size()+"----------"+batchNum);
                     }
                     if (sendStatus) {
                         //调用财企接口查询支付状态

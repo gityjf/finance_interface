@@ -20,7 +20,6 @@ import java.util.*;
  **/
 public class XmlUtil {
 
-    private static Map<String, Integer> countMap = new HashMap<>();
     public static final String prefix_xml = "<?xml version=\"1.0\" encoding = \"UTF-8\"?>";
 
 
@@ -67,15 +66,15 @@ public class XmlUtil {
     }
 
     /**
-     * 支付指令xml生成样例
+     * 创建支付指令xml生成
      *
      * @param payLists
      * @return
      */
-    public static String payListToXml(List<Map<String, String>> payLists,String sendTime) {
+    public static String createPayListToXml(List<Map<String, String>> payLists, String sendTime) {
         StringBuffer bf = new StringBuffer(prefix_xml);
         bf.append("<Iss_Itreasury><InstrReq>").append("<OperationType>1</OperationType>")
-                .append("<SystemID>RZDP</SystemID>").append("<BatchNo></BatchNo>").append("<IsManual>1</IsManual>")
+                .append("<SystemID>RDP</SystemID>").append("<BatchNo></BatchNo>").append("<IsManual>1</IsManual>")
                 .append("<SendTime>" + sendTime + "</SendTime>")
                 .append(standardCreXml("InstrContent", payLists))
                 .append("</InstrReq></Iss_Itreasury>");
@@ -84,7 +83,7 @@ public class XmlUtil {
 
 
     /**
-     * 查询支付指令xml生成样例
+     * 查询支付指令xml生成
      *
      * @param queryLists
      * @return
@@ -93,25 +92,23 @@ public class XmlUtil {
         String sendTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS").format(new Date());
         StringBuffer bf = new StringBuffer(prefix_xml);
         bf.append("<Iss_Itreasury><QueryReq>").append("<OperationType>2</OperationType>")
-                .append("<SystemID>RZDP</SystemID>").append("<SendTime>" + sendTime + "</SendTime>")
+                .append("<SystemID>RDP</SystemID>").append("<SendTime>" + sendTime + "</SendTime>")
                 .append(standardCreXml("QueryContent", queryLists))
                 .append("</QueryReq></Iss_Itreasury>");
         return bf.toString();
     }
 
 
-
-
     /**
      * 通用xml报文体生成
      *
-     * @param label  标签名
-     * @param labels 内部标签及数据
+     * @param label    标签名
+     * @param contents 内部标签及数据
      * @return
      */
-    public static String standardCreXml(String label, List<Map<String, String>> labels) {
+    public static String standardCreXml(String label, List<Map<String, String>> contents) {
         StringBuffer bf = new StringBuffer();
-        labels.forEach((map) -> {
+        contents.forEach((map) -> {
             bf.append("<" + label + ">");
             map.forEach((key, value) -> {
                 bf.append("<").append(key).append(">").append(value).append("</").append(key).append(">");
@@ -122,31 +119,12 @@ public class XmlUtil {
     }
 
 
-    public static void main(String[] args) throws Exception {
-        int apply = 1;
-        for (int i = 0; i < 10; i++) {
-            String applyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", apply++);
-            System.out.println(applyCode);
-        }
-
-//        List<Map<String, String>> maps = xmlToMap("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Iss_Itreasury><QueryRen><OperationType>12</OperationType><ProcessCode>0000</ProcessCode><ProcessDesc>查询账户交易流水接口调用成功</ProcessDesc><TotalCount>1</TotalCount><CurCount>1</CurCount><QueryNextPage></QueryNextPage><QueryContent><QueryBankCode/><QueryPageNumber/><REVERSE1/><REVERSE2/></QueryContent><RenContent><BankCode>001100011002</BankCode><BankName>中国人民银行营业管理部营业室</BankName><AreaProvince>北京</AreaProvince><AreaName>北京</AreaName><REVERSE1></REVERSE1><REVERSE2></REVERSE2></RenContent></QueryRen></Iss_Itreasury>");
-//        System.out.println(maps.size());
-//        for (Map<String, String> map : maps) {
-//            System.out.println("========================");
-//            map.forEach((key, value) -> {
-//                System.out.println(key.toUpperCase() + "-----" + value);
-//            });
-//        }
-    }
-
-
-
     //测试支付指令
-    public static List<Map<String, String>> payInstructList(int count) {
+    public static List<Map<String, String>> testPayInstructList(int count) {
         //业务申请编号
         List<Map<String, String>> lists = new ArrayList<>();
-        for (int i =1; i <= count; i++) {
-            String ApplyCode = "RZDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", i);
+        for (int i = 1; i <= count; i++) {
+            String ApplyCode = "RDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", i);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("ApplyCode", ApplyCode);
             map.put("CurrencyCode", "");
@@ -176,7 +154,7 @@ public class XmlUtil {
             map.put("SginText", "");
             map.put("MoneyUseCode", "");
             map.put("MoneyUseExplain", "");
-            map.put("REVERSE1", ""+i);
+            map.put("REVERSE1", "" + i);
             map.put("REVERSE2", "");
             map.put("REVERSE3", "");
             map.put("REVERSE4", "");
@@ -188,7 +166,7 @@ public class XmlUtil {
 
 
     //测试查询支付指令
-    public static List<Map<String, String>> queryPayInstructList(){
+    public static List<Map<String, String>> testQueryPayInstructList() {
         List<Map<String, String>> lists = new ArrayList<>();
         Map<String, String> map = new LinkedHashMap<>();
         map.put("APPLYCODE", "RZDP20200108132528273000001");
