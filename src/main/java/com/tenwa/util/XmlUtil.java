@@ -124,7 +124,8 @@ public class XmlUtil {
         //业务申请编号
         List<Map<String, String>> lists = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
-            String ApplyCode = "RDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", i);
+//            String ApplyCode = "RDP" + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + String.format("%06d", i);
+            String ApplyCode = "RDP898989898989898777" + String.format("%06d", i);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("ApplyCode", ApplyCode);
             map.put("CurrencyCode", "");
@@ -137,10 +138,14 @@ public class XmlUtil {
             map.put("RecAccountNo", "6893465989876589798875");
             map.put("RecAccountName", "物产中大财务公司1");
 
-            Map<String, String> bankMap = BankNoUtil.queryBankInfoByBankNo("001100011002");
-            map.put("RecBankName", bankMap.get("BankName"));
-            map.put("RecBankProvince", bankMap.get("AreaProvince"));
-            map.put("RecBankCity", bankMap.get("AreaName"));
+            map.put("RecBankName", "名称");
+            map.put("RecBankProvince", "省");
+            map.put("RecBankCity", "市");
+
+//            Map<String, String> bankMap = BankNoUtil.queryBankInfoByBankNo("001100011002");
+//            map.put("RecBankName", bankMap.get("BankName"));
+//            map.put("RecBankProvince", bankMap.get("AreaProvince"));
+//            map.put("RecBankCity", bankMap.get("AreaName"));
 
             map.put("RecBankCNAPSNO", "12345678");
 
